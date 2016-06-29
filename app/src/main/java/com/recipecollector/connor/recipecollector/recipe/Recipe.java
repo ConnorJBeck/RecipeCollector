@@ -7,7 +7,7 @@ import java.util.List;
 public class Recipe {
 
     private List<Ingredient> ingredients;
-    private List<Instruction> instructions;
+    private List<String> instructions;
     private MealCategory category;
 
     public Recipe() {
@@ -21,23 +21,29 @@ public class Recipe {
     }
 
     public void setCategory(String category) {
-        this.category = new MealCategory(category);
+        MealCategory newCategory;
+        if (MealCategoryManager.contains(category)) {
+            newCategory = MealCategoryManager.getCategory(category);
+        } else {
+            newCategory = new MealCategory(category, this);
+            MealCategoryManager.addCategory(newCategory);
+        }
+        this.category = newCategory;
     }
 
     public void addIngredient(String ingredient, int amount, Measure measure) {
-
-        IngredientItem newIngredientItem = getIngredientFromManager(ingredient);
+        IngredientItem newIngredientItem = getIngredientItem(ingredient);
         ingredients.add(new Ingredient(newIngredientItem, amount, measure, this));
     }
 
     public void addIngredient(String ingredient, int amount) {
-        IngredientItem newIngredientItem = getIngredientFromManager(ingredient);
-        ingredients.add(new Ingredient(ingredient, amount, this));
+        IngredientItem newIngredientItem = getIngredientItem(ingredient);
+        ingredients.add(new Ingredient(newIngredientItem, amount, this));
     }
 
     public void addIngredient(IngredientItem ingredient, int amount, Measure measure) {
-        IngredientItem newIngredientItem = getIngredientFromManager(ingredient.getName());
-        ingredients.add(new Ingredient(ingredient, amount, measure, this));
+        IngredientItem newIngredientItem = getIngredientItem(ingredient.getName());
+        ingredients.add(new Ingredient(newIngredientItem, amount, measure, this));
     }
 
     /**
@@ -46,21 +52,34 @@ public class Recipe {
      * @param amount
      */
     public void addIngredient(IngredientItem ingredient, int amount) {
-        IngredientItem newIngredientItem = getIngredientFromManager(ingredient.getName());
-        ingredients.add(new Ingredient(ingredient, amount, this));
+        IngredientItem newIngredientItem = getIngredientItem(ingredient.getName());
+        ingredients.add(new Ingredient(newIngredientItem, amount, this));
     }
 
     public void removeIngredient(String ingredient) {
         ingredients.remove(new Ingredient(ingredient, 0, this));
     }
 
-    private IngredientItem getIngredientFromManager(String ingredient) {
+    public List<String> getInstructions() {
+        return instructions;
+    }
+
+    public void addInstruction(String instruction) {
+        instructions.add(instruction);
+    }
+
+    public void removeInstruction(String instruction) {
+        instructions.add(instruction);
+    }
+
+    private IngredientItem getIngredientItem(String ingredient) {
         IngredientItem newIngredientItem;
         if (!IngredientManager.getInstance().containsKey(ingredient)) {
             newIngredientItem = new IngredientItem(ingredient, this);
             IngredientManager.addIngredient(newIngredientItem);
         } else {
             newIngredientItem = IngredientManager.getIngredient(ingredient);
+            newIngredientItem.addRecipe(this);
         }
         return newIngredientItem;
     }
